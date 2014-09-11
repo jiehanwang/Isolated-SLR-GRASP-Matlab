@@ -9,7 +9,7 @@ function [Para_ARMA_test,Para_ARMA_train,TTrainKernel, VValKernel,accuracy,test_
 addpath(genpath('D:\iCode\GitHub\libsvm\matlab'));
 %% Settings and Initial
 names = importdata('.\input\sign_1000_zeng.txt');
-classNum = 370;
+classNum = 1000;
 n = 10;              % 子空间大小
 trainNum = 2;
 segmentNum = 5;       % 将一个sign分成的段数。以后可以用low rank去求解

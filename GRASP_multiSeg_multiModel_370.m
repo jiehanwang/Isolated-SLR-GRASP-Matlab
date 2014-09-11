@@ -1,17 +1,19 @@
-% function [Para_ARMA_test,Para_ARMA_train,TTrainKernel, VValKernel,accuracy,test_label, training_label, model_precomputed] ...
-%     = GRASP_1000(testID, training_path_01,training_path_02,test_path)
+function [Para_ARMA_test,Para_ARMA_train,TTrainKernel, VValKernel,accuracy,test_label, training_label, model_precomputed] ...
+    = GRASP_multiSeg_multiModel_370(testID, training_path_01,training_path_02,training_path_03,training_path_04,test_path)
 
-test_path  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_1000sign_zeng\test_30\';
-training_path_01  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_1000sign_zeng\test_31\';
-training_path_02  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_1000sign_zeng\test_32\';
-testID = 30;
+% test_path  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_369sign\test_50\';
+% training_path_01  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_369sign\test_51\';
+% training_path_02  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_369sign\test_52\';
+% training_path_03  = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_369sign\test_53\';
+% training_path_04 = 'D:\iData\Outputs\ftdcgrs_whj_output\dim334_CTskp_allFrame_369sign\test_54\';
+% testID = 50;
 
 addpath(genpath('D:\iCode\GitHub\libsvm\matlab'));
-%% Settings a
-names = importdata('.\input\sign_1000_zeng.txt');
+%%
+names = importdata('.\input\sign_370.txt');
 classNum = 370;
 n = 5;
-trainNum = 2;
+trainNum = 4;
 segmentNum = 5;       %将一个sign分成的段数。以后可以用low rank去求解
 training_label = zeros(trainNum*length(names), segmentNum);
 test_label = zeros(length(names), segmentNum);
@@ -24,9 +26,12 @@ for i = 1 : length(names)
     data = cell(1, 5);
     data{1} = importdata([training_path_01 names{i} '.txt'], ' ', 1);
     data{2} = importdata([training_path_02 names{i} '.txt'], ' ', 1);
-    data{3} = importdata([test_path names{i} '.txt'], ' ', 1);
+    data{3} = importdata([training_path_03 names{i} '.txt'], ' ', 1);
+    data{4} = importdata([training_path_04 names{i} '.txt'], ' ', 1);
+    data{5} = importdata([test_path names{i} '.txt'], ' ', 1);
     
-    for g=1:3   % g==3作测试用
+    
+    for g=1:5   % g==5作测试用
         data_norm = (insertFrame(data{g}.data,n))';
         
         % 首先通过一个函数建立cov快查表
@@ -45,8 +50,14 @@ for i = 1 : length(names)
         
         for seg = 1:segmentNum
             %data_insert = (insertFrame((data_norm(:,1:segP(seg)))', n))';
+%             if seg == 1
+%                 startP = 1;
+%             else
+%                 startP = segP(seg-1)+1;
+%             end
             endP = segP(seg);
-            if g < 3 
+            
+            if g < 5 
                 Para_ARMA_train{seg, trainNum*(i-1) + g}.C = grasp_region(1, endP, P, Q, n);
                 %Para_ARMA_train{seg, trainNum*(i-1) + g} = construct_ARMA_whj(data_insert,n,n-1);
                 training_label(trainNum*(i-1)+g, seg) = str2double(names{i}(2:5));
@@ -57,6 +68,7 @@ for i = 1 : length(names)
             end
         end
     end
+    
 end
 %% Training and test
 score = zeros(classNum, classNum, segmentNum);
